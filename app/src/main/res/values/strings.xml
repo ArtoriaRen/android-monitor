@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">USMMonitor</string>
+    <string name="explaination_permission_to_grant">Failed to retrieve app usage
+        statistics. You may need to enable access
+        for this app through Settings > Security > Apps with usage access
+    </string>
+</resources>
