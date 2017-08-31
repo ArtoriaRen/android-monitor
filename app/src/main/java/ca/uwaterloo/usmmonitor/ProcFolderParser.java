@@ -21,6 +21,7 @@ import java.util.Set;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.text.NumberFormat;
+import java.util.concurrent.TimeUnit;
 
 import static android.R.attr.process;
 import static org.apache.commons.lang3.StringUtils.split;
@@ -146,6 +147,12 @@ public class ProcFolderParser extends IntentService {
             }
             // send result back to RunningProcessFragment
             sendIntent("processes", "processInfo", processesInfo.toString());
+            // Sleep for a second to reduce CPU usage of this monitoring app
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
