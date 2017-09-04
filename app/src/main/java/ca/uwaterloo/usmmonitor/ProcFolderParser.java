@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Set;
 
@@ -23,7 +22,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.text.NumberFormat;
 import java.util.concurrent.TimeUnit;
 
-import static android.R.attr.process;
 import static org.apache.commons.lang3.StringUtils.split;
 
 /**
@@ -56,7 +54,7 @@ public class ProcFolderParser extends IntentService {
     private ActivityManager.MemoryInfo generalMem = new ActivityManager.MemoryInfo();
     // total memory of the device, this value will also be used to calculate mem percentage of each proc by AppProcess.class
     public static long totalMem;
-    private NumberFormat formater = NumberFormat.getNumberInstance(Locale.US);
+    public static NumberFormat formatter = NumberFormat.getNumberInstance(Locale.US);
     private long totalTime = 1, busyTime = 1, totalTimeLast = 0, busyTimeLast = 0;
     public static final String DELIMITER = "#";
     private int[] keysArray;
@@ -122,7 +120,7 @@ public class ProcFolderParser extends IntentService {
             // send general usage msg back to MainActivity
             StringBuilder generalInfo = new StringBuilder(String.format("%.2f", generalCpuUsage * 100) + DELIMITER);
             activityManager.getMemoryInfo(generalMem);
-            generalInfo.append(formater.format(generalMem.availMem >> 10) + DELIMITER + String.format("%.2f", generalMem.availMem * 100 / (double) generalMem.totalMem));
+            generalInfo.append(formatter.format(generalMem.availMem >> 10) + DELIMITER + String.format("%.2f", generalMem.availMem * 100 / (double) generalMem.totalMem));
             sendIntent("general", "cpuMem", generalInfo.toString());
             // send per-process usage to RunningProcesesFragment
             StringBuilder processesInfo = new StringBuilder("");
@@ -137,7 +135,7 @@ public class ProcFolderParser extends IntentService {
                     }
                     processesInfo.append(processHashMap.get(keysArray[i]).getPid() + DELIMITER);
                     processesInfo.append(processHashMap.get(keysArray[i]).getPackageName() + DELIMITER);
-                    processesInfo.append(formater.format(processMemArray[i].getTotalPss()) + DELIMITER);
+                    processesInfo.append(formatter.format(processMemArray[i].getTotalPss()) + DELIMITER);
                     processesInfo.append(String.format(Locale.getDefault(), "%.2f", processMemArray[i].getTotalPss() * 100 / (float) totalMem) + DELIMITER);
                     processesInfo.append(String.format(Locale.getDefault(), "%.2f", processHashMap.get(keysArray[i]).cpuUsage * 100) + ";");
 //                    Log.d(LOG_TAG, "process pid=" + processHashMap.get(i).getPid() + ", names = " + processHashMap.get(i).getPackageName() + ", memory usage = " + processMemArray[i].getTotalPss() + ", " + String.format("%.2f", processMemArray[i].getTotalPss() * 100 / (double) totalMem) + " %" + ", " + processHashMap.get(i).cpuUsage + "%");

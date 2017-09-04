@@ -14,22 +14,29 @@ import java.util.List;
 
 import ca.uwaterloo.usmmonitor.details.DetailActivity;
 
-import static android.R.attr.start;
+import ca.uwaterloo.usmmonitor.database.ProcessInfoContract.ProcessInfoEntry;
+
+import static ca.uwaterloo.usmmonitor.R.id.pid;
 
 /**
  * Provide views to RecyclerView with the directory entries.
  */
-public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
+public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     public static final String PID = "pid";
     private static List<AppStats> mAppStatList = new ArrayList<>();
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final TextView mAppLabel;
         private final TextView mPackageName;
         private final TextView mLastTimeUsed;
         private final ImageView mAppIcon;
         private TextView mCpuUsage, mMemUsage;
-        private String pid;
+        // pid, cpu usage, and memory usage are displayed on TextViews with other auxiliary strings,
+        // so we use Strings to store them
+        private String mPidString;
+        private String mCpuUsageString;
+        private String mMemoryUsageKbString;
+        private String mMemoryUsagePercentString;
 
         public ViewHolder(View v) {
             super(v);
@@ -42,13 +49,45 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             v.setOnClickListener(this);
         }
 
-        public TextView getAppLabel() {return mAppLabel;}
-        public TextView getPackageName() {return mPackageName;}
-        public TextView getLastTimeUsed() {return mLastTimeUsed;}
-        public ImageView getAppIcon() {return mAppIcon;}
-        public TextView getmCpuUsage() {return mCpuUsage;}
-        public TextView getmMemUsage() {return mMemUsage;}
-        public void setPid(String pid) {this.pid = pid;}
+        public TextView getAppLabel() {
+            return mAppLabel;
+        }
+
+        public TextView getPackageName() {
+            return mPackageName;
+        }
+
+        public TextView getLastTimeUsed() {
+            return mLastTimeUsed;
+        }
+
+        public ImageView getAppIcon() {
+            return mAppIcon;
+        }
+
+        public TextView getmCpuUsage() {
+            return mCpuUsage;
+        }
+
+        public TextView getmMemUsage() {
+            return mMemUsage;
+        }
+
+        public void setPid(String pid) {
+            this.mPidString = pid;
+        }
+
+        public void setmCpuUsageString(String mCpuUsageString) {
+            this.mCpuUsageString = mCpuUsageString;
+        }
+
+        public void setmMemoryUsageKbString(String mMemoryUsageKbString) {
+            this.mMemoryUsageKbString = mMemoryUsageKbString;
+        }
+
+        public void setmMemoryUsagePercentString(String mMemoryUsagePercentString) {
+            this.mMemoryUsagePercentString = mMemoryUsagePercentString;
+        }
 
 
         @Override
@@ -56,16 +95,22 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             Toast.makeText(v.getContext(), "clicked", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(v.getContext(), DetailActivity.class);
             intent.putExtra(PID, pid);
+            // package name is directly displayed on the TextView, so we can getText from TextView
+            intent.putExtra(ProcessInfoEntry.COLUME_PACKAGE_NAME, mPackageName.getText());
+            intent.putExtra(ProcessInfoEntry.COLUME_CPU_USAGE, mCpuUsageString);
+            intent.putExtra(ProcessInfoEntry.COLUME_MEMORY_USAGE_KB, mMemoryUsageKbString);
+            intent.putExtra(ProcessInfoEntry.COLUME_MEMORY_USAGE_PERCENT, mMemoryUsagePercentString);
             v.getContext().startActivity(intent);
         }
     }
+
+    // void constructor
     public ListAdapter() {
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.row, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.row, parent, false);
         return new ViewHolder(v);
     }
 
@@ -79,6 +124,9 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
 //        holder.getLastTimeUsed().setText(mDataFormat.format(new Date(lastTimeUsed)));
         holder.getAppIcon().setImageDrawable(mAppStatList.get(position).appIcon);
         holder.setPid(mAppStatList.get(position).pid);
+        holder.setmCpuUsageString(mAppStatList.get(position).cpuUsage);
+        holder.setmMemoryUsageKbString(mAppStatList.get(position).memUsageKB);
+        holder.setmMemoryUsagePercentString(mAppStatList.get(position).memUsagePercent);
     }
 
     @Override
@@ -86,7 +134,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
         return mAppStatList.size();
     }
 
-    public void setAppStatList(List<AppStats> appStatsList){
+    public void setAppStatList(List<AppStats> appStatsList) {
         mAppStatList = appStatsList;
     }
 }
