@@ -1,5 +1,6 @@
 package ca.uwaterloo.usmmonitor;
 
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -37,6 +38,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         private String mCpuUsageString;
         private String mMemoryUsageKbString;
         private String mMemoryUsagePercentString;
+
 
         public ViewHolder(View v) {
             super(v);
@@ -92,9 +94,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
         @Override
         public void onClick(View v) {
-            Toast.makeText(v.getContext(), "clicked", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(v.getContext(), DetailActivity.class);
-            intent.putExtra(PID, pid);
+            intent.putExtra(PID, mPidString);
             // package name is directly displayed on the TextView, so we can getText from TextView
             intent.putExtra(ProcessInfoEntry.COLUME_PACKAGE_NAME, mPackageName.getText());
             intent.putExtra(ProcessInfoEntry.COLUME_CPU_USAGE, mCpuUsageString);

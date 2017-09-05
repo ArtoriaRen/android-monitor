@@ -1,5 +1,6 @@
 package ca.uwaterloo.usmmonitor.details;
 
+import android.app.ActivityManager;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
@@ -28,6 +29,7 @@ import static ca.uwaterloo.usmmonitor.ProcFolderParser.formatter;
  */
 
 public class DetailActivity extends AppCompatActivity{
+    private int pid;
     private String packageName;
     private float cpuUsage;
     private int memoryUsageKb;
@@ -35,6 +37,8 @@ public class DetailActivity extends AppCompatActivity{
     private TextView pidTextView;
     private ProcessInfoDbHelper mDbHelper;
     private SQLiteDatabase mDb;
+    // activity manager is needed to kill background processes associated with a package
+    private ActivityManager am;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -49,6 +53,7 @@ public class DetailActivity extends AppCompatActivity{
         // Keep a reference to the mDb until this activity is paused. Get a writable database
         // because the process info will be added to DB once user click the "killButton".
         mDb = mDbHelper.getWritableDatabase();
+        am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 
 
 
@@ -57,6 +62,7 @@ public class DetailActivity extends AppCompatActivity{
 
     /**
      * This method is called when user clicks on the "Kill This Process" button.
+     * First save the data into database and then kill the corresponding process.
      * @param view The calling view (button)
      */
     public void addToDatabase(View view) {
@@ -67,6 +73,9 @@ public class DetailActivity extends AppCompatActivity{
         cv.put(ProcessInfoEntry.COLUME_MEMORY_USAGE_PERCENT, memoryUsagePercent);
         // This insert method returns the id of new record added
         mDb.insert(ProcessInfoEntry.TABLE_NAME, null, cv);
+        // cannot kill process in other packages
+//        android.os.Process.killProcess(pid);
+        am.killBackgroundProcesses(packageName);
     }
 
 
@@ -75,7 +84,8 @@ public class DetailActivity extends AppCompatActivity{
      * @param intent The intent starting this "detail" activity.
      */
     private void parsingIntent(Intent intent){
-        pidTextView.setText("PID = " + intent.getStringExtra(ListAdapter.PID));
+        pid = Integer.parseInt(intent.getStringExtra(ListAdapter.PID));
+        pidTextView.setText("PID = " + pid);
         packageName = intent.getStringExtra(ProcessInfoEntry.COLUME_PACKAGE_NAME);
         cpuUsage = Float.parseFloat(intent.getStringExtra(ProcessInfoEntry.COLUME_CPU_USAGE));
         try {
