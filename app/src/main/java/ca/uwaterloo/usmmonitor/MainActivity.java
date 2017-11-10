@@ -5,10 +5,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 
 import java.text.NumberFormat;
@@ -26,11 +25,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String[] generalInfo = intent.getStringExtra("cpuMem").split(ProcFolderParser.DELIMITER);
-            Log.d(LOG_TAG, "received cpu  = " + generalInfo[0]);
+//            Log.d(LOG_TAG, "received cpu  = " + generalInfo[0]);
             mGenralCpuUsage.setText("Total CPU usage: " + generalInfo[0] + "%");
             mAvailMem.setText("Available Memory: " + generalInfo[1] + "KB, " + generalInfo[2] + "%");
         }
     };
+
+
 
 
 
@@ -58,6 +59,20 @@ public class MainActivity extends AppCompatActivity {
         am.getMemoryInfo(memInfo);
         mTotalMem.setText("Total memory: " + formater.format(memInfo.totalMem >> 10) + "KB   Threshold: "
         + formater.format(memInfo.threshold >> 10) + "KB");
+
+        // Create the dummy account
+//        SyncUtils.CreateSyncAccount(this);
+        // Pass the settings flags by inserting them in a bundle
+//        Bundle settingsBundle = new Bundle();
+//        settingsBundle.putBoolean(
+//                ContentResolver.SYNC_EXTRAS_MANUAL, true);
+//        settingsBundle.putBoolean(
+//                ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        /*
+         * Request the sync for the default account, authority, and
+         * manual sync settings
+         */
+//        Log.i(LOG_TAG, "send sync req from Main");
     }
 
     @Override
@@ -71,4 +86,36 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
         super.onPause();
     }
+
+    /**
+     * Create a new dummy account for the sync adapter
+     *
+     * @param context The application context
+     */
+//    public static Account CreateSyncAccount(Context context) {
+//        // Create the account type and default account
+//        Account newAccount = new Account(
+//                ACCOUNT, ACCOUNT_TYPE);
+//        // Get an instance of the Android account manager
+//        AccountManager accountManager =
+//                (AccountManager) context.getSystemService(
+//                        ACCOUNT_SERVICE);
+//        /*
+//         * Add the account and account type, no password or user data
+//         * If successful, return the Account object, otherwise report an error.
+//         */
+//        if (accountManager.addAccountExplicitly(newAccount, null, null)) {
+//            /*
+//             * If you don't set android:syncable="true" in
+//             * in your <provider> element in the manifest,
+//             * then call context.setIsSyncable(account, AUTHORITY, 1)
+//             * here.
+//             */
+//        } else {
+//            /*
+//             * The account exists or some other error occurred. Log this, report it,
+//             * or handle it internally.
+//             */
+//        }
+//    }
 }

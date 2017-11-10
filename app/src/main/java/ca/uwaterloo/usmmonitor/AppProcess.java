@@ -1,17 +1,8 @@
 package ca.uwaterloo.usmmonitor;
 
-import android.content.pm.PackageManager;
-import android.text.TextUtils;
-import android.util.Log;
-
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
-import static android.R.attr.process;
-import static android.R.attr.start;
 
 /**
  * Created by liuyangren on 2017-08-11.
@@ -56,10 +47,10 @@ public class AppProcess {
         this.reader = new BufferedReader(new FileReader(String.format("/proc/%d/stat", this.pid)));
         fieldsCpu = reader.readLine().split("[ ]+", 23);
         this.cpuTime = Long.parseLong(fieldsCpu[13]) + Long.parseLong(fieldsCpu[14]) + Long.parseLong(fieldsCpu[15]) + Long.parseLong(fieldsCpu[16]);
-        Log.d(LOG_TAG, "packageName = " + packageName + ",fieldsCpu[13] = " + fieldsCpu[13] + ", current time =" + System.currentTimeMillis() / 1000);
+//        Log.d(LOG_TAG, "packageName = " + packageName + ",fieldsCpu[13] = " + fieldsCpu[13] + ", current time =" + System.currentTimeMillis() / 1000);
         this.reader.close();
         this.cpuUsage = (this.cpuTime - this.cpuTimeLast) / (float) ProcFolderParser.samplePeriod;
-        Log.d(LOG_TAG, packageName + "cpu usage = " + cpuUsage + ": process cpuTime = " + cpuTime + ", Last time = " + cpuTimeLast);
+//        Log.d(LOG_TAG, packageName + "cpu usage = " + cpuUsage + ": process cpuTime = " + cpuTime + ", Last time = " + cpuTimeLast);
         this.cpuTimeLast = this.cpuTime;
     }
 

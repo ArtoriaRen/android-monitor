@@ -1,28 +1,33 @@
 package ca.uwaterloo.usmmonitor;
 
-import android.content.BroadcastReceiver;
-import android.content.IntentFilter;
-import android.support.v4.app.Fragment;
+import android.annotation.TargetApi;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
+
+import ca.uwaterloo.usmmonitor.synchronization.SyncUtils;
 
 /**
  * Fragment that use UsageStatsManager API to get current running processes.
@@ -36,6 +41,10 @@ public class RunningProcessesFragment extends Fragment {
     RecyclerView.LayoutManager mLayoutManager;
     private List<AppStats> mAppStatsList;
     private PackageManager mPackageManager;
+    /**
+     * Options menu used to populate ActionBar.
+     */
+    private Menu mOptionsMenu;
 
 
 
@@ -51,7 +60,7 @@ public class RunningProcessesFragment extends Fragment {
                 mAppStatsList.clear();
             }
             String msg = intent.getStringExtra("processInfo");
-            Log.d(LOG_TAG, "Received msg = " + msg);
+//            Log.d(LOG_TAG, "Received msg = " + msg);
             if (msg != null) {
                 String[] infoArray = msg.split(";");
                 for (String s : infoArray) {
@@ -79,7 +88,7 @@ public class RunningProcessesFragment extends Fragment {
             appStats.appIcon = mPackageManager.getApplicationIcon(appStats.packageName);
             appStats.appLabel = mPackageManager.getApplicationLabel(mPackageManager.getApplicationInfo(appStats.packageName, 0)).toString();
         } catch (PackageManager.NameNotFoundException e) {
-            Log.d(LOG_TAG, String.format("App Icon is not found for %s, use default icon.", appStats.packageName));
+//            Log.d(LOG_TAG, String.format("App Icon is not found for %s, use default icon.", appStats.packageName));
             appStats.appIcon = getActivity().getDrawable(R.mipmap.ic_default_app_launcher);
         }
         mAppStatsList.add(appStats);
@@ -103,6 +112,8 @@ public class RunningProcessesFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // add a refresh menu
+        setHasOptionsMenu(true);
         mUsageStatsManager = (UsageStatsManager) getActivity().getSystemService(Context.USAGE_STATS_SERVICE);
         mAppStatsList = new ArrayList<>();
     }
@@ -164,6 +175,55 @@ public class RunningProcessesFragment extends Fragment {
 //    }
 
     /**
+     * Create the ActionBar.
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        mOptionsMenu = menu;
+        inflater.inflate(R.menu.menu_refresh, menu);
+    }
+
+    /**
+     * Respond to user gestures on the ActionBar.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // If the user clicks the "Refresh" button.
+            case R.id.menu_refresh:
+                Log.i(LOG_TAG, "user clicked the refresh button.");
+                SyncUtils.TriggerRefresh();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Set the state of the Refresh button. If a sync is active, turn on the ProgressBar widget.
+     * Otherwise, turn it off.
+     *
+     * @param refreshing True if an active sync is occuring, false otherwise
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void setRefreshActionButtonState(boolean refreshing) {
+        if (mOptionsMenu == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+            return;
+        }
+
+        final MenuItem refreshItem = mOptionsMenu.findItem(R.id.menu_refresh);
+        if (refreshItem != null) {
+            if (refreshing) {
+                refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
+            } else {
+                refreshItem.setActionView(null);
+            }
+        }
+    }
+
+
+
+    /**
      * Updates the {@link #mRecyclerView} with the list of {@link UsageStats} passed as an argument.
      *
      * @param usageStatsList A list of {@link UsageStats} from which update the
@@ -183,7 +243,7 @@ public class RunningProcessesFragment extends Fragment {
                 Log.w(LOG_TAG, String.format("App Icon is not found for %s, use default icon.", appStats.usageStats.getPackageName()));
                 appStats.appIcon = getActivity().getDrawable(R.mipmap.ic_default_app_launcher);
             }
-            Log.d(LOG_TAG, appStats.usageStats.getPackageName() + ": \n LastTimeStamp =" + new Date(appStats.usageStats.getLastTimeStamp()) + "\n LastTimeUsed = " + new Date(appStats.usageStats.getLastTimeUsed()) + "\n FirstTimeStamp = " + new Date(appStats.usageStats.getFirstTimeStamp()));
+//            Log.d(LOG_TAG, appStats.usageStats.getPackageName() + ": \n LastTimeStamp =" + new Date(appStats.usageStats.getLastTimeStamp()) + "\n LastTimeUsed = " + new Date(appStats.usageStats.getLastTimeUsed()) + "\n FirstTimeStamp = " + new Date(appStats.usageStats.getFirstTimeStamp()));
             mAppStatsList.add(appStats);
 
 
